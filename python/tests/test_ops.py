@@ -463,10 +463,10 @@ class TestOps(mlx_tests.MLXTestCase):
         x_npy = np.array([1.0, 2.0, 3.0, 4.0]).astype(np.float32)
         x_mlx = mx.array(x_npy)
 
-        y_npy = x_npy[0:4:2]
+        y_npy = x_npy[:4:2]
         y_npy = np.broadcast_to(y_npy, (2, 2))
 
-        y_mlx = x_mlx[0:4:2]
+        y_mlx = x_mlx[:4:2]
         y_mlx = mx.broadcast_to(y_mlx, (2, 2))
 
         for axis in (None, 0, 1, (0, 1)):
@@ -840,7 +840,7 @@ class TestOps(mlx_tests.MLXTestCase):
         idx_mlx = mx.array(idx_np)
 
         for ax in [None, 0, 1, 2]:
-            if ax == None:
+            if ax is None:
                 shape = [-1]
             else:
                 shape = [2] * 3
@@ -1005,9 +1005,9 @@ class TestOps(mlx_tests.MLXTestCase):
                         y_ = mx.array(x_)
                         test_ops(getattr(np, op), getattr(mx, op), x_, y_, atol)
 
-            with self.subTest(op="arc" + op):
+            with self.subTest(op=f"arc{op}"):
                 float_dtypes = [("float16", 1e-3), ("float32", 1e-6)]
-                op_inv = "arc" + op
+                op_inv = f"arc{op}"
 
                 for dtype, atol in float_dtypes:
                     with self.subTest(dtype=dtype):
@@ -1045,7 +1045,7 @@ class TestOps(mlx_tests.MLXTestCase):
                     mx_vjp = lambda x: mx.vjp(getattr(mx, op_), [primal_mx], [x])[1][0]
                     test_ops(np_vjp, mx_vjp, x_, y_, atol_)
 
-                with self.subTest(op="arc" + op):
+                with self.subTest(op=f"arc{op}"):
                     np_op_fwd = getattr(np, op)
                     primal_np = np_op_fwd(xi).astype(np.float32)
 
@@ -1058,7 +1058,7 @@ class TestOps(mlx_tests.MLXTestCase):
                     primal_mx = mx.array(primal_np)
                     x_ = x.astype(np.float32)
                     y_ = mx.array(x_)
-                    op_ = "arc" + op
+                    op_ = f"arc{op}"
                     atol_ = 1e-5
 
                     np_vjp = lambda x: np_vjp_funcs[op_](primal_np, x)
@@ -1301,7 +1301,7 @@ class TestOps(mlx_tests.MLXTestCase):
                 c_mlx = mxop(a_mlx, axis=axis)
                 self.assertTrue(np.allclose(c_npy, c_mlx, rtol=1e-4, atol=1e-4))
 
-        for op in ["cumsum", "cumprod", "cummax", "cummin"]:
+        for _ in ["cumsum", "cumprod", "cummax", "cummin"]:
             c1 = mxop(a_mlx, axis=2)
             c2 = mxop(a_mlx, axis=2, inclusive=False, reverse=False)
             self.assertTrue(mx.array_equal(c1[:, :, :-1], c2[:, :, 1:]))

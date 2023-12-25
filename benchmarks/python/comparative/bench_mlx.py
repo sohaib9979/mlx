@@ -17,28 +17,24 @@ def int_or_list(x):
 
 
 def none_or_list(x):
-    if x == "":
-        return None
-    else:
-        return [int(xi) for xi in x.split(",")]
+    return None if x == "" else [int(xi) for xi in x.split(",")]
 
 
 def dtype_from_str(x):
     if x == "":
         return mx.float32
-    else:
-        dt = getattr(mx, x)
-        if not isinstance(dt, mx.Dtype):
-            raise ValueError(f"{x} is not an mlx dtype")
-        return dt
+    dt = getattr(mx, x)
+    if not isinstance(dt, mx.Dtype):
+        raise ValueError(f"{x} is not an mlx dtype")
+    return dt
 
 
 def bench(f, *args):
-    for i in range(10):
+    for _ in range(10):
         f(*args)
 
     s = time.time()
-    for i in range(100):
+    for _ in range(100):
         f(*args)
     e = time.time()
     return e - s
@@ -46,58 +42,51 @@ def bench(f, *args):
 
 def matmul_square(x):
     y = x
-    for i in range(10):
+    for _ in range(10):
         y = y @ x
     mx.eval(y)
     return y
 
 
 def matmul(x, y):
-    ys = []
-    for i in range(10):
-        ys.append(x @ y)
+    ys = [x @ y for _ in range(10)]
     mx.eval(ys)
 
 
 def quant_matmul(x, w, s, b):
     groups = x.shape[-1] // s.shape[-1]
     width = 32 // (x.shape[-1] // w.shape[0])
-    ys = []
-    for i in range(10):
-        ys.append(mx.quantized_matmul(x, w, s, b, groups=groups, width=width))
+    ys = [
+        mx.quantized_matmul(x, w, s, b, groups=groups, width=width)
+        for _ in range(10)
+    ]
     mx.eval(ys)
 
 
 def conv1d(x, y):
-    ys = []
-    for i in range(10):
-        ys.append(mx.conv1d(x, y))
+    ys = [mx.conv1d(x, y) for _ in range(10)]
     mx.eval(ys)
 
 
 def conv2d(x, y):
-    ys = []
-    for i in range(10):
-        ys.append(mx.conv2d(x, y))
+    ys = [mx.conv2d(x, y) for _ in range(10)]
     mx.eval(ys)
 
 
 def binary(op, x, y):
-    for i in range(100):
+    for _ in range(100):
         y = getattr(mx, op)(x, y)
     mx.eval(y)
 
 
 def reduction(op, axis, x):
-    ys = []
-    for i in range(100):
-        ys.append(getattr(mx, op)(x, axis=axis))
+    ys = [getattr(mx, op)(x, axis=axis) for _ in range(100)]
     mx.eval(ys)
 
 
 def softmax(axis, x):
     ys = []
-    for i in range(100):
+    for _ in range(100):
         ex = mx.exp(x - mx.max(x, axis=axis, keepdims=True))
         y = ex / mx.sum(ex, axis=axis, keepdims=True)
         ys.append(y)
@@ -106,7 +95,7 @@ def softmax(axis, x):
 
 def softmax_fused(axis, x):
     ys = []
-    for i in range(100):
+    for _ in range(100):
         y = mx.softmax(x, axis=axis)
         ys.append(y)
     mx.eval(ys)
@@ -114,77 +103,77 @@ def softmax_fused(axis, x):
 
 def relu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.relu(y)
     mx.eval(y)
 
 
 def leaky_relu(x: mx.array):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.leaky_relu(y)
     mx.eval(y)
 
 
 def prelu(x: mx.array):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.prelu(y, mx.ones(1))
     mx.eval(y)
 
 
 def softplus(x: mx.array):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.softplus(y)
     mx.eval(y)
 
 
 def mish(x: mx.array):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.mish(y)
     mx.eval(y)
 
 
 def leaky_relu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.leaky_relu(y)
     mx.eval(y)
 
 
 def elu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.elu(y)
     mx.eval(y)
 
 
 def relu6(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.relu6(y)
     mx.eval(y)
 
 
 def softplus(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.softplus(y)
     mx.eval(y)
 
 
 def celu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.celu(y)
     mx.eval(y)
 
 
 def log_sigmoid(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.log_sigmoid(y)
     mx.eval(y)
 
@@ -198,7 +187,7 @@ def scalar_mult(x):
 
 def cross_entropy(targets, x):
     ys = []
-    for i in range(100):
+    for _ in range(100):
         y = mx.logsumexp(x, axis=-1, keepdims=True) - mx.take_along_axis(
             x, mx.reshape(targets, (-1, 1)), axis=-1
         )
@@ -207,23 +196,19 @@ def cross_entropy(targets, x):
 
 
 def logsumexp(axis, x):
-    ys = []
-    for i in range(100):
-        ys.append(mx.logsumexp(x, axis=axis))
+    ys = [mx.logsumexp(x, axis=axis) for _ in range(100)]
     mx.eval(ys)
 
 
 def linear(w, b, x):
-    ys = []
-    for i in range(10):
-        ys.append(x @ mx.transpose(w, (1, 0)) + b)
+    ys = [x @ mx.transpose(w, (1, 0)) + b for _ in range(10)]
     mx.eval(ys)
 
 
 def rope(x):
     *_, N, D = x.shape
     ys = []
-    for i in range(10):
+    for _ in range(10):
         shape = x.shape
         x = mx.reshape(x, (-1, N, D))
         positions = mx.arange(N)
@@ -242,44 +227,36 @@ def rope(x):
 
 
 def concatenate(axis, x, y):
-    ys = []
-    for i in range(10):
-        ys.append(mx.concatenate([x, y], axis=axis))
+    ys = [mx.concatenate([x, y], axis=axis) for _ in range(10)]
     mx.eval(ys)
 
 
 def cumsum(axis, x):
-    ys = []
-    for i in range(10):
-        ys.append(mx.cumsum(x, axis))
+    ys = [mx.cumsum(x, axis) for _ in range(10)]
     mx.eval(ys)
 
 
 def sort(axis, x):
-    ys = []
-    for i in range(10):
-        ys.append(mx.sort(x, axis))
+    ys = [mx.sort(x, axis) for _ in range(10)]
     mx.eval(ys)
 
 
 def topk(axis, x):
     k = x.shape[axis] // 3
-    ys = []
-    for i in range(10):
-        ys.append(mx.topk(x, k, axis))
+    ys = [mx.topk(x, k, axis) for _ in range(10)]
     mx.eval(ys)
 
 
 def step_function(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.step(x)
     mx.eval(y)
 
 
 def selu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = nn.selu(x)
     mx.eval(y)
 

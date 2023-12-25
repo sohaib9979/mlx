@@ -114,10 +114,7 @@ class QuantizedLinear(Module):
         linear_class_predicate=lambda m: isinstance(m, Linear),
     ):
         def _quantize_if_linear(m):
-            if linear_class_predicate(m):
-                return cls.from_linear(m, group_size, bits)
-            else:
-                return m
+            return cls.from_linear(m, group_size, bits) if linear_class_predicate(m) else m
 
         leaves = model.leaf_modules()
         leaves = tree_map(_quantize_if_linear, leaves, is_leaf=Module.is_module)

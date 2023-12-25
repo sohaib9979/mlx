@@ -16,28 +16,24 @@ def int_or_list(x):
 
 
 def none_or_list(x):
-    if x == "":
-        return None
-    else:
-        return [int(xi) for xi in x.split(",")]
+    return None if x == "" else [int(xi) for xi in x.split(",")]
 
 
 def dtype_from_str(x):
     if x == "":
         return torch.float32
-    else:
-        dt = getattr(torch, x)
-        if not isinstance(dt, torch.dtype):
-            raise ValueError(f"{x} is not a torch dtype")
-        return dt
+    dt = getattr(torch, x)
+    if not isinstance(dt, torch.dtype):
+        raise ValueError(f"{x} is not a torch dtype")
+    return dt
 
 
 def bench(f, *args):
-    for i in range(10):
+    for _ in range(10):
         f(*args)
 
     s = time.time()
-    for i in range(100):
+    for _ in range(100):
         f(*args)
     e = time.time()
     return e - s
@@ -51,16 +47,14 @@ def sync_if_needed(x):
 @torch.no_grad()
 def matmul_square(x):
     y = x
-    for i in range(10):
+    for _ in range(10):
         y = y @ x
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def matmul(x, y):
-    ys = []
-    for i in range(10):
-        ys.append(x @ y)
+    ys = [x @ y for _ in range(10)]
     sync_if_needed(x)
 
 
@@ -68,9 +62,7 @@ def matmul(x, y):
 def conv1d(x, y):
     x = torch.transpose(x, -1, -2)
     y = torch.transpose(y, -1, -2)
-    ys = []
-    for i in range(10):
-        ys.append(torch.nn.functional.conv1d(x, y))
+    ys = [torch.nn.functional.conv1d(x, y) for _ in range(10)]
     sync_if_needed(x)
 
 
@@ -78,31 +70,27 @@ def conv1d(x, y):
 def conv2d(x, y):
     x = torch.permute(x, (0, 3, 1, 2))
     y = torch.permute(y, (0, 3, 1, 2))
-    ys = []
-    for i in range(10):
-        ys.append(torch.nn.functional.conv2d(x, y))
+    ys = [torch.nn.functional.conv2d(x, y) for _ in range(10)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def binary(op, x, y):
-    for i in range(100):
+    for _ in range(100):
         y = getattr(torch, op)(x, y)
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def reduction(op, axis, x):
-    ys = []
-    for i in range(100):
-        ys.append(getattr(x, op)(axis))
+    ys = [getattr(x, op)(axis) for _ in range(100)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def softmax(axis, x):
     ys = []
-    for i in range(100):
+    for _ in range(100):
         ex = torch.exp(x - torch.max(x, dim=axis, keepdims=True).values)
         y = ex / torch.sum(ex, dim=axis, keepdims=True)
         ys.append(y)
@@ -111,16 +99,14 @@ def softmax(axis, x):
 
 @torch.no_grad()
 def softmax_fused(axis, x):
-    ys = []
-    for i in range(100):
-        ys.append(torch.nn.functional.softmax(x, dim=axis))
+    ys = [torch.nn.functional.softmax(x, dim=axis) for _ in range(100)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def relu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = torch.nn.functional.relu(y)
     sync_if_needed(x)
 
@@ -128,7 +114,7 @@ def relu(x):
 @torch.no_grad()
 def leaky_relu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = torch.nn.functional.leaky_relu(y)
     sync_if_needed(x)
 
@@ -136,7 +122,7 @@ def leaky_relu(x):
 @torch.no_grad()
 def elu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = torch.nn.functional.elu(y)
     sync_if_needed(x)
 
@@ -144,7 +130,7 @@ def elu(x):
 @torch.no_grad()
 def celu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = torch.nn.functional.celu(y)
     sync_if_needed(x)
 
@@ -152,7 +138,7 @@ def celu(x):
 @torch.no_grad()
 def relu6(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = torch.nn.functional.relu6(y)
     sync_if_needed(x)
 
@@ -160,7 +146,7 @@ def relu6(x):
 @torch.no_grad()
 def softplus(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = torch.nn.functional.softplus(y)
     sync_if_needed(x)
 
@@ -168,7 +154,7 @@ def softplus(x):
 @torch.no_grad()
 def log_sigmoid(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = torch.nn.functional.logsigmoid(y)
     sync_if_needed(x)
 
@@ -199,33 +185,25 @@ def scalar_mult(x):
 
 @torch.no_grad()
 def cross_entropy(targets, x):
-    ys = []
-    for i in range(100):
-        ys.append(torch.nn.functional.cross_entropy(x, targets))
+    ys = [torch.nn.functional.cross_entropy(x, targets) for _ in range(100)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def logsumexp(axis, x):
-    ys = []
-    for i in range(100):
-        ys.append(torch.logsumexp(x, dim=axis))
+    ys = [torch.logsumexp(x, dim=axis) for _ in range(100)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def linear_fused(w, b, x):
-    ys = []
-    for i in range(10):
-        ys.append(torch.nn.functional.linear(x, w, b))
+    ys = [torch.nn.functional.linear(x, w, b) for _ in range(10)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def linear(w, b, x):
-    ys = []
-    for i in range(10):
-        ys.append((x @ torch.transpose(w, -2, -1)) + b)
+    ys = [(x @ torch.transpose(w, -2, -1)) + b for _ in range(10)]
     sync_if_needed(x)
 
 
@@ -233,7 +211,7 @@ def linear(w, b, x):
 def rope(x):
     *_, N, D = x.shape
     ys = []
-    for i in range(10):
+    for _ in range(10):
         x = x.view(-1, N, D)
         positions = torch.arange(N, device=x.device)
         freqs = 10000 ** torch.linspace(0, 1, D // 2, device=x.device)
@@ -252,41 +230,33 @@ def rope(x):
 
 @torch.no_grad()
 def concatenate(axis, x, y):
-    ys = []
-    for i in range(10):
-        ys.append(torch.cat([x, y], dim=axis))
+    ys = [torch.cat([x, y], dim=axis) for _ in range(10)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def cumsum(axis, x):
-    ys = []
-    for i in range(10):
-        ys.append(x.cumsum(axis))
+    ys = [x.cumsum(axis) for _ in range(10)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def sort(axis, x):
-    ys = []
-    for i in range(10):
-        ys.append(torch.sort(x, dim=axis)[0])
+    ys = [torch.sort(x, dim=axis)[0] for _ in range(10)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def topk(axis, x):
     k = x.shape[axis] // 3
-    ys = []
-    for i in range(10):
-        ys.append(torch.topk(x, k, dim=axis)[0])
+    ys = [torch.topk(x, k, dim=axis)[0] for _ in range(10)]
     sync_if_needed(x)
 
 
 @torch.no_grad()
 def selu(x):
     y = x
-    for i in range(100):
+    for _ in range(100):
         y = torch.nn.functional.selu(y)
     sync_if_needed(x)
 

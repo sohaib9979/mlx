@@ -47,7 +47,7 @@ class TestQuantized(mlx_tests.MLXTestCase):
         w = mx.random.normal(shape=(32, 128), key=k2)
         w_q, scales, biases = mx.quantize(w, group_size, bits)
         w_hat = mx.dequantize(w_q, scales, biases, group_size, bits)
-        for s in [(3, 128), (2, 1, 7, 128)]:
+        for _ in [(3, 128), (2, 1, 7, 128)]:
             x = mx.random.normal(shape=(3, 128), key=k1)
             y_q = mx.quantized_matmul(x, w_q.T, scales, biases, group_size, bits)
             y_hat = x @ w_hat.T

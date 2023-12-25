@@ -19,12 +19,12 @@ N_iter_func = 5
 
 
 def bench(f, a, b):
-    for i in range(N_warmup):
+    for _ in range(N_warmup):
         f(a, b)
     torch.mps.synchronize()
 
     s = time.perf_counter_ns()
-    for i in range(N_iter_bench):
+    for _ in range(N_iter_bench):
         f(a, b)
     e = time.perf_counter_ns()
     return (e - s) * 1e-9
@@ -32,7 +32,7 @@ def bench(f, a, b):
 
 def gemm_nn_mlx(a, b):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = a @ b
         ys.append(y)
     mx.eval(ys)
@@ -41,7 +41,7 @@ def gemm_nn_mlx(a, b):
 
 def gemm_nt_mlx(a, b):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = a @ b.transpose((0, 2, 1))
         ys.append(y)
     mx.eval(ys)
@@ -50,7 +50,7 @@ def gemm_nt_mlx(a, b):
 
 def gemm_tn_mlx(a, b):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = a.transpose((0, 2, 1)) @ b
         ys.append(y)
     mx.eval(ys)
@@ -59,7 +59,7 @@ def gemm_tn_mlx(a, b):
 
 def gemm_tt_mlx(a, b):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = a.transpose((0, 2, 1)) @ b.transpose((0, 2, 1))
         ys.append(y)
     mx.eval(ys)
@@ -69,7 +69,7 @@ def gemm_tt_mlx(a, b):
 @torch.no_grad()
 def gemm_nn_torch(a, b):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = a @ b
         ys.append(y)
     torch.mps.synchronize()
@@ -79,7 +79,7 @@ def gemm_nn_torch(a, b):
 @torch.no_grad()
 def gemm_nt_torch(a, b):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = a @ b.transpose(-1, -2)
         ys.append(y)
     torch.mps.synchronize()
@@ -89,7 +89,7 @@ def gemm_nt_torch(a, b):
 @torch.no_grad()
 def gemm_tn_torch(a, b):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = a.transpose(-1, -2) @ b
         ys.append(y)
     torch.mps.synchronize()
@@ -99,7 +99,7 @@ def gemm_tn_torch(a, b):
 @torch.no_grad()
 def gemm_tt_torch(a, b):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = a.transpose(-1, -2) @ b.transpose(-1, -2)
         ys.append(y)
     torch.mps.synchronize()

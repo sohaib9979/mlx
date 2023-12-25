@@ -132,7 +132,7 @@ class TestBF16(mlx_tests.MLXTestCase):
                             np_kwargs={"axis": axes},
                             mlx_kwargs={"axis": axes},
                             torch_kwargs={"dim": axes},
-                            torch_op="a" + op,
+                            torch_op=f"a{op}",
                         )
 
     def test_arg_reduction_ops(self):

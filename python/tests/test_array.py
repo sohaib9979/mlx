@@ -538,8 +538,8 @@ class TestArray(mlx_tests.MLXTestCase):
         self.assertEqual((a >= b).tolist(), [True, False, True])
 
         self.assertEqual((a < 5).tolist(), [True, True, False])
-        self.assertEqual((5 < a).tolist(), [False, False, False])
-        self.assertEqual((5 <= a).tolist(), [False, False, True])
+        self.assertEqual((a > 5).tolist(), [False, False, False])
+        self.assertEqual((a >= 5).tolist(), [False, False, True])
         self.assertEqual((a > 1).tolist(), [False, False, True])
         self.assertEqual((a >= 1).tolist(), [False, True, True])
 
@@ -753,25 +753,25 @@ class TestArray(mlx_tests.MLXTestCase):
         a[None] = 1
         self.assertEqual(a.tolist(), [1, 1, 1])
 
-        a[0:1] = 2
+        a[:1] = 2
         self.assertEqual(a.tolist(), [2, 1, 1])
 
-        a[0:2] = 3
+        a[:2] = 3
         self.assertEqual(a.tolist(), [3, 3, 1])
 
-        a[0:3] = 4
+        a[:3] = 4
         self.assertEqual(a.tolist(), [4, 4, 4])
 
-        a[0:1] = mx.array(0)
+        a[:1] = mx.array(0)
         self.assertEqual(a.tolist(), [0, 4, 4])
 
-        a[0:1] = mx.array([1])
+        a[:1] = mx.array([1])
         self.assertEqual(a.tolist(), [1, 4, 4])
 
         with self.assertRaises(ValueError):
-            a[0:1] = mx.array([2, 3])
+            a[:1] = mx.array([2, 3])
 
-        a[0:2] = mx.array([2, 2])
+        a[:2] = mx.array([2, 2])
         self.assertEqual(a.tolist(), [2, 2, 4])
 
         a[:] = mx.array([[[[1, 1, 1]]]])
