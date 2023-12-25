@@ -35,12 +35,12 @@ benchmark_vector_lens.sort()
 
 
 def bench(f, m, v):
-    for i in range(N_warmup):
+    for _ in range(N_warmup):
         f(m, v)
     torch.mps.synchronize()
 
     s = time.perf_counter_ns()
-    for i in range(N_iter_bench):
+    for _ in range(N_iter_bench):
         f(m, v)
     e = time.perf_counter_ns()
     return (e - s) * 1e-9
@@ -48,7 +48,7 @@ def bench(f, m, v):
 
 def gemv_mlx(m, v):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = m @ v
         ys.append(y)
     mx.eval(ys)
@@ -57,7 +57,7 @@ def gemv_mlx(m, v):
 
 def gemv_t_mlx(m, v):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = v @ m
         ys.append(y)
     mx.eval(ys)
@@ -67,7 +67,7 @@ def gemv_t_mlx(m, v):
 @torch.no_grad()
 def gemv_torch(m, v):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = m @ v
         ys.append(y)
     torch.mps.synchronize()
@@ -77,7 +77,7 @@ def gemv_torch(m, v):
 @torch.no_grad()
 def gemv_t_torch(m, v):
     ys = []
-    for i in range(N_iter_func):
+    for _ in range(N_iter_func):
         y = v @ m
         ys.append(y)
     torch.mps.synchronize()

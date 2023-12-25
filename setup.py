@@ -78,10 +78,10 @@ class CMakeBuild(build_ext):
         cmake_args += [f"-DMLX_VERSION={self.distribution.get_version()}"]  # type: ignore[attr-defined]
 
         if sys.platform.startswith("darwin"):
-            # Cross-compile support for macOS - respect ARCHFLAGS if set
-            archs = re.findall(r"-arch (\S+)", os.environ.get("ARCHFLAGS", ""))
-            if archs:
-                cmake_args += ["-DCMAKE_OSX_ARCHITECTURES={}".format(";".join(archs))]
+            if archs := re.findall(
+                r"-arch (\S+)", os.environ.get("ARCHFLAGS", "")
+            ):
+                cmake_args += [f'-DCMAKE_OSX_ARCHITECTURES={";".join(archs)}']
 
         # Set CMAKE_BUILD_PARALLEL_LEVEL to control the parallel build level
         # across all generators.

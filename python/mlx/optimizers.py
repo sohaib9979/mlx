@@ -127,15 +127,8 @@ class SGD(Optimizer):
             gradient += self.weight_decay * parameter
 
         v = self.momentum * v
-        if self.dampening > 0:
-            v += (1 - self.dampening) * gradient
-        else:
-            v += gradient
-
-        if self.nesterov:
-            update = gradient + self.momentum * v
-        else:
-            update = v
+        v += (1 - self.dampening) * gradient if self.dampening > 0 else gradient
+        update = gradient + self.momentum * v if self.nesterov else v
         state["v"] = v
         return parameter - self.learning_rate * update
 

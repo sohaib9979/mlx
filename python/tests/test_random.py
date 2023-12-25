@@ -104,7 +104,7 @@ class TestRandom(mlx_tests.MLXTestCase):
         self.assertEqual(a.shape, shape)
 
         a = mx.random.randint(-10, 10, [1000, 1000])
-        self.assertTrue(mx.all(-10 <= a).item() and mx.all(a < 10).item())
+        self.assertTrue(mx.all(a >= -10).item() and mx.all(a < 10).item())
 
         a = mx.random.randint(10, -10, [1000, 1000])
         self.assertTrue(mx.all(a == 10).item())

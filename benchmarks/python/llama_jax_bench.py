@@ -18,12 +18,11 @@ class RoPE(nn.Module):
         rx1 = x1 * costheta - x2 * sintheta
         rx2 = x1 * sintheta + x2 * costheta
 
-        if self.dims < x.shape[-1]:
-            rx = jnp.concatenate([rx1, rx2, x[..., self.dims :]], axis=-1)
-        else:
-            rx = jnp.concatenate([rx1, rx2], axis=-1)
-
-        return rx
+        return (
+            jnp.concatenate([rx1, rx2, x[..., self.dims :]], axis=-1)
+            if self.dims < x.shape[-1]
+            else jnp.concatenate([rx1, rx2], axis=-1)
+        )
 
     def _compute_traditional_rope(self, costheta, sintheta, x):
         x1 = x[..., ::2]
@@ -36,9 +35,7 @@ class RoPE(nn.Module):
                 "RoPE doesn't implement partial traditional application"
             )
 
-        rx = jnp.concatenate([rx1[..., None], rx2[..., None]], axis=-1)
-
-        return rx
+        return jnp.concatenate([rx1[..., None], rx2[..., None]], axis=-1)
 
     @staticmethod
     def create_cos_sin_theta(
@@ -48,7 +45,7 @@ class RoPE(nn.Module):
         base: float = 10000,
         dtype=jnp.float32,
     ):
-        D = D // 2
+        D //= 2
         positions = jnp.arange(offset, N, dtype=dtype)
         freqs = jnp.exp(-jnp.arange(0, D, dtype=dtype) * (math.log(base) / D))
         theta = positions.reshape((-1, 1)) * freqs.reshape((1, -1))
@@ -157,12 +154,12 @@ class LlamaEncoderLayer(nn.Module):
 
 
 def measure(model, x, cache):
-    for i in range(5):
+    for _ in range(5):
         y, c = model(x, mask=None, cache=cache)
         jax.block_until_ready((y, c))
 
     start = time.time()
-    for i in range(5):
+    for _ in range(5):
         y, c = model(x, mask=None, cache=cache)
         jax.block_until_ready((y, c))
 

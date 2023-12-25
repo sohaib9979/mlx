@@ -85,9 +85,9 @@ def tree_flatten(tree, prefix="", is_leaf=None):
     Returns:
         List[Tuple[str, Any]]: The flat representation of the python tree.
     """
-    flat_tree = []
-
     if is_leaf is None or not is_leaf(tree):
+        flat_tree = []
+
         if isinstance(tree, (list, tuple)):
             for i, t in enumerate(tree):
                 flat_tree.extend(tree_flatten(t, f"{prefix}.{i}", is_leaf))
@@ -136,14 +136,12 @@ def tree_unflatten(tree):
             children[current_idx] = []
         children[current_idx].append((next_idx, value))
 
-    # recursively map them to the original container
-    if is_list:
-        keys = sorted((int(idx), idx) for idx in children.keys())
-        l = []
-        for i, k in keys:
-            while i > len(l):
-                l.append({})
-            l.append(tree_unflatten(children[k]))
-        return l
-    else:
+    if not is_list:
         return {k: tree_unflatten(v) for k, v in children.items()}
+    keys = sorted((int(idx), idx) for idx in children)
+    l = []
+    for i, k in keys:
+        while i > len(l):
+            l.append({})
+        l.append(tree_unflatten(children[k]))
+    return l

@@ -307,7 +307,7 @@ class Module(dict):
         while module_stack:
             prefix, mod = module_stack.pop()
             apply_fn(prefix, mod)
-            prefix = "." + prefix if prefix else ""
+            prefix = f".{prefix}" if prefix else ""
             module_stack.extend(
                 tree_flatten(mod.children(), prefix=prefix, is_leaf=self.is_module)
             )

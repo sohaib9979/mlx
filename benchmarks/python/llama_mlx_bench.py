@@ -79,13 +79,13 @@ class LlamaEncoderLayer(nn.Module):
 
 
 def measure(model, x, cache):
-    for i in range(5):
+    for _ in range(5):
         y, c = model(x, mask=None, cache=cache)
         mx.eval(y, c)
 
     start = time.time()
     rs = []
-    for i in range(5):
+    for _ in range(5):
         y, c = model(x, mask=None, cache=cache)
         rs.append((y, c))
     mx.eval(rs)
